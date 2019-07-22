@@ -1,0 +1,28 @@
+{
+  "name": "efrogg/api-sdk",
+  "type": "library",
+  "description": "Api Serialization Tool",
+  "keywords": ["api"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Raphael HOMANN",
+      "email": "raph@e-frogg.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.4.0",
+    "efrogg/collection": ">=1.1.1",
+    "symfony/serializer": "^3.4 || ^4.2",
+    "symfony/property-access": "^3.4 || ^4.2",
+    "symfony/property-info": "^3.4 || ^4.2"
+  },
+  "autoload": {
+    "psr-4": { "Apistarter\\Sdk\\": "src/Apistarter/Sdk/" }
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.0.x-dev"
+    }
+  }
+}
