@@ -26,7 +26,7 @@ use Apistarter\Sdk\Exception\UnauthorizedException;
 use Apistarter\Sdk\Exception\UnknownException;
 use Apistarter\Sdk\Model\SdkModel;
 use Apistarter\Sdk\Response\AbstractResponse;
-use Apistarter\Sdk\SdkClientInterface;
+use Apistarter\Sdk\Client\SdkClientInterface;
 use Exception;
 
 abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
