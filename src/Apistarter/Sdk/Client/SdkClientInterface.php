@@ -6,7 +6,7 @@
  * Time: 05:05
  */
 
-namespace Apistarter\Sdk;
+namespace Apistarter\Sdk\Client;
 
 
 use Apistarter\Sdk\Request\SdkRequestInterface;
