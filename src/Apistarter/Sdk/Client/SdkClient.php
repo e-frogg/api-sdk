@@ -9,6 +9,10 @@ use Apistarter\Sdk\Request\RequestWithBody;
 use Apistarter\Sdk\Request\SdkRequestInterface;
 use Apistarter\Sdk\Response\SingleObjectResponse;
 use Efrogg\Collection\ObjectArrayAccess;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Psr7\Request;
+use function GuzzleHttp\Psr7\stream_for;
 use function is_array;
 use function is_object;
 use function is_string;
@@ -25,7 +29,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      */
     protected $serializer;
     /**
-     * @var ApiClientInterface
+     * @var Client
      */
     private $apiClient;
 
@@ -39,21 +43,22 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      */
     private $debug = false;
 
+    private $requestOptions = [];
+
     /**
      * SdkClient constructor.
-     * @param ApiClientInterface $apiClient
+     * @param Client $guzzleClient
      * @param SerializerInterface $serializer
      */
-    public function __construct(ApiClientInterface $apiClient, SerializerInterface $serializer)
+    public function __construct(Client $guzzleClient, SerializerInterface $serializer)
     {
-        $this->apiClient = $apiClient;
+        $this->apiClient = $guzzleClient;
         $this->setSerializer($serializer);
         parent::__construct();
     }
 
     public function execute(SdkRequestInterface $request)
     {
-
         $body = [];
         if ($request instanceof RequestWithBody) {
             //TODO : gestion des exceptions
@@ -65,11 +70,22 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
 
 
         //TODO : gestion des exceptions
-        $api_response = $this->apiClient->call(
-            $request->getMethod(),
-            $request->getEndPoint(),
-            $body
-        );
+        try {
+            $guzzleRequest = new Request($request->getMethod(), $request->getUrl());
+            if (!empty($body)) {
+                $bodyStream = stream_for($body);
+                $guzzleRequest->withBody($bodyStream);
+            }
+
+            $api_response = $this->apiClient->send(
+                $guzzleRequest,
+                $this->requestOptions
+            );
+        } catch (GuzzleException $e) {
+            // todo : gestion de l'exception (event ?)
+            // fwd l'exception
+            throw new \Apistarter\Sdk\Exception\GuzzleException($e->getMessage(), $e->getCode());
+        }
 
 
         $return_response_class = $request->getResponseClass();
@@ -77,8 +93,10 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         if (!class_exists($return_response_class)) {
             throw new LogicException("invalid response class $return_response_class");
         }
-        if (is_subclass_of($return_response_class, SingleObjectResponse::class)) {
+        $response_body = $api_response->getBody()->getContents();
 
+        if (is_subclass_of($return_response_class, SingleObjectResponse::class)) {
+            /** @var SingleObjectResponse $return_response_class */
             // cas d'une réponse avec un seul type, on crée la réponse,
             // et on y injecte la propriété désérialisée, avec le bon type
 
@@ -86,7 +104,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
 
             $object_class = $return_response_class::getResponsePropertyType();
             $object = $this->serializer->deserialize(
-                $api_response->getContent(),
+                $response_body,
                 $object_class,
                 $request->getFormat()
             );
@@ -97,10 +115,9 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             return $return_response;
         }
 
-        $response_body = $api_response->getContent();
 
-        if ($request->getMethod() === "DELETE") {
-            $array_response_body = array('code' => $api_response->getStatusCode());
+        if ('DELETE' === $request->getMethod()) {
+            $array_response_body = ['code' => $api_response->getStatusCode()];
             if ($api_response->getStatusCode() !== 204) {
                 throw new RuntimeException("Not 204 code for DELETE");
             }
@@ -108,12 +125,13 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         }
 
         // cas d'une réponse désérialisable directement (Response / Model)
-        return $this->getDecorateResponseBody($this->serializer->deserialize(
-            $response_body,
-            $return_response_class,
-            $request->getFormat()
-        ));
-
+        return $this->getDecorateResponseBody(
+            $this->serializer->deserialize(
+                $response_body,
+                $return_response_class,
+                $request->getFormat()
+            )
+        );
     }
 
     /**
@@ -212,5 +230,29 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         }
         return $data;
     }
+
+    /**
+     * options Guzzle passées au send
+     * @param array $requestOptions
+     * @return SdkClient
+     * @see \GuzzleHttp\RequestOptions.
+     */
+    public function setRequestOptions(array $requestOptions): SdkClient
+    {
+        $this->requestOptions = $requestOptions;
+        return $this;
+    }
+
+    /**
+     * @param $name
+     * @param $arguments
+     * @return array|string
+     * @throws \Apistarter\Sdk\Exception\GuzzleException
+     */
+    public function __call($name, $arguments)
+    {
+        return $this->execute(...$arguments);
+    }
+
 
 }
