@@ -4,6 +4,9 @@
 namespace Apistarter\Sdk\Client;
 
 
+use Apistarter\Sdk\Event\RequestErrorEvent;
+use Apistarter\Sdk\Event\responseEvent;
+use Apistarter\Sdk\Event\SdkClientEvent;
 use Apistarter\Sdk\Decorator\BodyDecoratorInterface;
 use Apistarter\Sdk\Request\RequestWithBody;
 use Apistarter\Sdk\Request\SdkRequestInterface;
@@ -13,6 +16,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use function GuzzleHttp\Psr7\stream_for;
 use function is_array;
@@ -62,10 +66,10 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     public function execute(SdkRequestInterface $request)
     {
         $body = [];
-        if ($request instanceof RequestWithBody) {
+        if ($request instanceof RequestWithBody && null !== ($bodyParams=$request->getBodyParams())) {
             //TODO : gestion des exceptions
             $body = $this->serializer->normalize(
-                $this->getDecorateRequestBody($request->getBodyParams()),
+                $this->getDecorateRequestBody($bodyParams),
                 $request->getFormat()
             );
             if (!is_string($body)) {
@@ -90,6 +94,11 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         } catch (GuzzleException $e) {
             // todo : gestion de l'exception (event ?)
             // fwd l'exception
+            $errorEvent = new RequestErrorEvent();
+            $errorEvent->request = $request;
+            $errorEvent->exception = $e;
+            $this->dispatch($errorEvent, SdkClientEvent::REQUEST_ERROR);
+
             throw new \Apistarter\Sdk\Exception\GuzzleException($e->getMessage(), $e->getCode());
         }
 
@@ -120,7 +129,6 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
                     $object_class,
                     $request->getFormat()
                 );
-//            }
             } catch (NotEncodableValueException $exception) {
                 dd($request, $body, $response_body);
             }
@@ -128,6 +136,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             $return_response_property = $return_response_class::getResponsePropertyName();
             $return_response->$return_response_property = $this->getDecorateResponseBody($object);
 
+            $this->dispatchResponseEvent($request, $api_response, $return_response);
             return $return_response;
         }
 
@@ -141,13 +150,21 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         }
 
         // cas d'une réponse désérialisable directement (Response / Model)
-        return $this->getDecorateResponseBody(
-            $this->serializer->deserialize(
-                $response_body,
-                $return_response_class,
-                $request->getFormat()
-            )
-        );
+        try {
+            $decoratedResponse = $this->getDecorateResponseBody(
+                $this->serializer->deserialize(
+                    $response_body,
+                    $return_response_class,
+                    $request->getFormat()
+                )
+            );
+        } catch (NotEncodableValueException $exception) {
+            dd($request, $body, $response_body);
+        }
+
+        $this->dispatchResponseEvent($request, $api_response, $decoratedResponse);
+
+        return $decoratedResponse;
     }
 
     /**
@@ -268,6 +285,18 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     public function __call($name, $arguments)
     {
         return $this->execute(...$arguments);
+    }
+
+    private function dispatchResponseEvent(
+        SdkRequestInterface $request,
+        ResponseInterface $apiResponse,
+        $sdkResponse
+    ) {
+        $responseEvent = new responseEvent();
+        $responseEvent->request = $request;
+        $responseEvent->apiResponse = $apiResponse;
+        $responseEvent->sdkResponse = $sdkResponse;
+        $this->dispatch($responseEvent, SdkClientEvent::RESPONSE);
     }
 
 
