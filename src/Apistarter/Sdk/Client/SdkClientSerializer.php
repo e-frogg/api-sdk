@@ -23,7 +23,7 @@ class SdkClientSerializer extends Serializer
             new SdkModelNormalizer(null, null, null, new SdkModelTypeExtractor()),
             new ArrayDenormalizer(),
             new DateTimeNormalizer(),
-            new ObjectNormalizer()
+            new ObjectNormalizer(),
         ];
 
         parent::__construct($normalizers, [new XmlEncoder(), new JsonEncoder()]);

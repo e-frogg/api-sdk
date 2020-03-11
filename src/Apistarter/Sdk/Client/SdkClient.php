@@ -12,6 +12,8 @@ use Efrogg\Collection\ObjectArrayAccess;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Psr7\Request;
+use GuzzleHttp\RequestOptions;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
 use function GuzzleHttp\Psr7\stream_for;
 use function is_array;
 use function is_object;
@@ -66,20 +68,24 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
                 $this->getDecorateRequestBody($request->getBodyParams()),
                 $request->getFormat()
             );
+            if (!is_string($body)) {
+                $body = json_encode($body);// TODO : ononononnono
+            }
         }
 
 
         //TODO : gestion des exceptions
         try {
             $guzzleRequest = new Request($request->getMethod(), $request->getUrl());
+            $options = $this->requestOptions;
             if (!empty($body)) {
-                $bodyStream = stream_for($body);
-                $guzzleRequest->withBody($bodyStream);
+                $options[RequestOptions::BODY] = $body;
             }
 
-            $api_response = $this->apiClient->send(
-                $guzzleRequest,
-                $this->requestOptions
+            $api_response = $this->apiClient->request(
+                $request->getMethod(),
+                $request->getUrl(),
+                $options
             );
         } catch (GuzzleException $e) {
             // todo : gestion de l'exception (event ?)
@@ -103,11 +109,21 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             $return_response = new $return_response_class();
 
             $object_class = $return_response_class::getResponsePropertyType();
-            $object = $this->serializer->deserialize(
-                $response_body,
-                $object_class,
-                $request->getFormat()
-            );
+
+//            if(null === $object_class) {
+//                $object=$response_body;
+//
+//            } else {
+            try {
+                $object = $this->serializer->deserialize(
+                    $response_body,
+                    $object_class,
+                    $request->getFormat()
+                );
+//            }
+            } catch (NotEncodableValueException $exception) {
+                dd($request, $body, $response_body);
+            }
 
             $return_response_property = $return_response_class::getResponsePropertyName();
             $return_response->$return_response_property = $this->getDecorateResponseBody($object);
