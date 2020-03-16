@@ -14,11 +14,11 @@ class responseEvent extends Event
     /**
      * @var SdkRequestInterface
      */
-    public SdkRequestInterface $request;
+    public $request;
     /**
      * @var ResponseInterface
      */
-    public ResponseInterface $apiResponse;
+    public $apiResponse;
     /**
      * @var mixed
      */

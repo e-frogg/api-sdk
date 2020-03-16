@@ -31,7 +31,7 @@ class AbstractResponse extends SdkModel
     protected static $responsePropertyTypes=[];
     // -------- fin a configurer -------------
 
-    public static function getPropertiesTypes(): array
+    public static function getPropertiesTypes()
     {
         return array_merge(parent::getPropertiesTypes(),[
             'error' => SdkResponseError::class

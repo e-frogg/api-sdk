@@ -85,7 +85,7 @@ abstract class GetCollectionRequest extends GetRequest
      * @param string $sort_way
      * @return $this
      */
-    public function addOrder($sort_on, $sort_way): self
+    public function addOrder($sort_on, $sort_way)
     {
         $this->order[$sort_on]=$sort_way;
         return $this;
@@ -95,13 +95,13 @@ abstract class GetCollectionRequest extends GetRequest
      * @param array $sort
      * @return GetCollectionRequest
      */
-    public function setOrder(array $sort): GetCollectionRequest
+    public function setOrder(array $sort)
     {
         $this->order = $sort;
         return $this;
     }
 
-    public function setItemsPerPage(int $items_per_page): self
+    public function setItemsPerPage($items_per_page)
     {
         $this->itemsPerPage = $items_per_page;
         return $this;
@@ -128,7 +128,7 @@ abstract class GetCollectionRequest extends GetRequest
      * @param bool $pagination
      * @return GetCollectionRequest
      */
-    public function setPagination(bool $pagination): GetCollectionRequest
+    public function setPagination($pagination)
     {
         $this->pagination = ($pagination?"true":"false");
         return $this;

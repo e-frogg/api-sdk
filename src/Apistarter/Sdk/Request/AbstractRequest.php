@@ -113,7 +113,7 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
     /**
      * @return array
      */
-    public static function getCustomExceptions(): array
+    public static function getCustomExceptions()
     {
         return array_merge(static::$defaultCustomExceptions,static::$customExceptions);
     }
@@ -122,7 +122,7 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
     /**
      * @return string
      */
-    public function getFormat(): string
+    public function getFormat()
     {
         return static::$format;
     }

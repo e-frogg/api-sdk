@@ -6,10 +6,17 @@ namespace Apistarter\Sdk\Event;
 
 use Apistarter\Sdk\Request\SdkRequestInterface;
 use Exception;
+use Symfony\Component\EventDispatcher\Event;
 
-class RequestErrorEvent
+class RequestErrorEvent extends Event
 {
-    public SdkRequestInterface $request;
+    /**
+     * @var SdkRequestInterface
+     */
+    public $request;
 
-    public Exception $exception;
+    /**
+     * @var Exception
+     */
+    public $exception;
 }

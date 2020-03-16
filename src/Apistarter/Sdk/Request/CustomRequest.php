@@ -30,7 +30,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @return string
      */
-    public function getFormat(): string
+    public function getFormat()
     {
         return $this->format;
     }
@@ -38,7 +38,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @param string $format
      */
-    public function setFormat(string $format)
+    public function setFormat($format)
     {
         $this->format = $format;
     }
@@ -46,7 +46,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @return string
      */
-    public function getMethod(): string
+    public function getMethod()
     {
         return $this->method;
     }
@@ -54,7 +54,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @param string $method
      */
-    public function setMethod(string $method)
+    public function setMethod($method)
     {
         $this->method = $method;
     }
@@ -62,7 +62,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @return string
      */
-    public function getUrl(): string
+    public function getUrl()
     {
         return $this->url;
     }
@@ -70,7 +70,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @param string $url
      */
-    public function setUrl(string $url)
+    public function setUrl($url)
     {
         $this->url = $url;
     }
@@ -78,7 +78,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @return string
      */
-    public function getEndPoint(): string
+    public function getEndPoint()
     {
         return $this->endPoint;
     }
@@ -86,7 +86,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @param string $endPoint
      */
-    public function setEndPoint(string $endPoint)
+    public function setEndPoint($endPoint)
     {
         $this->endPoint = $endPoint;
     }
@@ -94,7 +94,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @return string
      */
-    public function getResponseClass(): string
+    public function getResponseClass()
     {
         return $this->responseClass;
     }
@@ -102,7 +102,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @param string $responseClass
      */
-    public function setResponseClass(string $responseClass)
+    public function setResponseClass($responseClass)
     {
         $this->responseClass = $responseClass;
     }
@@ -110,7 +110,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @return array
      */
-    public function getQueryParameters(): array
+    public function getQueryParameters()
     {
         return $this->queryParameters;
     }
@@ -118,7 +118,7 @@ class CustomRequest implements SdkRequestInterface
     /**
      * @param array $queryParameters
      */
-    public function setQueryParameters(array $queryParameters)
+    public function setQueryParameters($queryParameters)
     {
         $this->queryParameters = $queryParameters;
     }

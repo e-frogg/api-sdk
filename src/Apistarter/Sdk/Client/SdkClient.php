@@ -60,7 +60,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     {
         $this->apiClient = $guzzleClient;
         $this->setSerializer($serializer);
-        parent::__construct();
+//        parent::__construct();
     }
 
     public function execute(SdkRequestInterface $request)
@@ -80,7 +80,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
 
         //TODO : gestion des exceptions
         try {
-            $guzzleRequest = new Request($request->getMethod(), $request->getUrl());
+//            $guzzleRequest = new Request($request->getMethod(), $request->getUrl());
             $options = $this->requestOptions;
             if (!empty($body)) {
                 $options[RequestOptions::BODY] = $body;
@@ -97,7 +97,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             $errorEvent = new RequestErrorEvent();
             $errorEvent->request = $request;
             $errorEvent->exception = $e;
-            $this->dispatch($errorEvent, SdkClientEvent::REQUEST_ERROR);
+            $this->dispatch(SdkClientEvent::REQUEST_ERROR,$errorEvent);
 
             throw new \Apistarter\Sdk\Exception\GuzzleException($e->getMessage(), $e->getCode());
         }
@@ -171,7 +171,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      * @param NormalizerInterface|SerializerInterface $serializer
      * @return self
      */
-    public function setSerializer(SerializerInterface $serializer): self
+    public function setSerializer(SerializerInterface $serializer)
     {
         $this->serializer = $serializer;
         return $this;
@@ -180,7 +180,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     /**
      * @return NormalizerInterface|SerializerInterface
      */
-    public function getSerializer(): SerializerInterface
+    public function getSerializer()
     {
         return $this->serializer;
     }
@@ -189,7 +189,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      * @param bool $debug
      * @return self
      */
-    public function setDebug(bool $debug): self
+    public function setDebug($debug)
     {
         $this->debug = $debug;
         return $this;
@@ -198,7 +198,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     /**
      * @return bool
      */
-    public function isDebug(): bool
+    public function isDebug()
     {
         return $this->debug;
     }
@@ -207,7 +207,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      * @param BodyDecoratorInterface $response_body_decorator
      * @return self
      */
-    public function addResponseBodyDecorator(BodyDecoratorInterface $response_body_decorator): self
+    public function addResponseBodyDecorator(BodyDecoratorInterface $response_body_decorator)
     {
         $this->response_body_decorators [] = $response_body_decorator;
         return $this;
@@ -217,7 +217,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      * @param BodyDecoratorInterface $request_body_decorator
      * @return self
      */
-    public function addRequestBodyDecorator(BodyDecoratorInterface $request_body_decorator): self
+    public function addRequestBodyDecorator(BodyDecoratorInterface $request_body_decorator)
     {
         $this->request_body_decorators[] = $request_body_decorator;
         return $this;
@@ -270,7 +270,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      * @return SdkClient
      * @see \GuzzleHttp\RequestOptions.
      */
-    public function setRequestOptions(array $requestOptions): SdkClient
+    public function setRequestOptions(array $requestOptions)
     {
         $this->requestOptions = $requestOptions;
         return $this;
@@ -296,7 +296,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         $responseEvent->request = $request;
         $responseEvent->apiResponse = $apiResponse;
         $responseEvent->sdkResponse = $sdkResponse;
-        $this->dispatch($responseEvent, SdkClientEvent::RESPONSE);
+        $this->dispatch(SdkClientEvent::RESPONSE,$responseEvent);
     }
 
 

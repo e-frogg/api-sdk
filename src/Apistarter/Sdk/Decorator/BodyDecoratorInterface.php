@@ -10,5 +10,5 @@ namespace Apistarter\Sdk\Decorator;
 
 interface BodyDecoratorInterface
 {
-    public function decorate(string $body):string;
+    public function decorate($body);
 }

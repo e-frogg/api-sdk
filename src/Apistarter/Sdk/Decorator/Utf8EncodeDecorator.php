@@ -12,7 +12,7 @@ namespace Apistarter\Sdk\Decorator;
 class Utf8EncodeDecorator implements BodyDecoratorInterface
 {
 
-    public function decorate(string $body):string
+    public function decorate($body)
     {
         return utf8_encode($body);
     }

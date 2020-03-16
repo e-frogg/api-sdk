@@ -17,7 +17,10 @@ use Symfony\Component\Serializer\Serializer;
 
 class SdkModelSerializer
 {
-    public static function factory(): Serializer
+    /**
+     * @return Serializer
+     */
+    public static function factory()
     {
         $normalizers = [
             new ObjectCollectionNormalizer(),

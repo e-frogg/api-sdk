@@ -9,7 +9,7 @@ use Psr\Http\Message\ResponseInterface;
 class SdkException extends \Exception
 {
 
-    /** @var ApiResponse */
+    /** @var ResponseInterface */
     protected $api_response;
 
     /** @var ResponseInterface */
@@ -28,9 +28,9 @@ class SdkException extends \Exception
     protected $request;
 
     /**
-     * @return ApiResponse
+     * @return ResponseInterface
      */
-    public function getApiResponse(): ApiResponse
+    public function getApiResponse()
     {
         return $this->api_response;
     }
@@ -38,15 +38,15 @@ class SdkException extends \Exception
     /**
      * @return bool
      */
-    public function hasApiResponse(): bool
+    public function hasApiResponse()
     {
         return null !== $this->api_response;
     }
 
     /**
-     * @param ApiResponse $api_response
+     * @param ResponseInterface $api_response
      */
-    public function setApiResponse(ApiResponse $api_response)
+    public function setApiResponse(ResponseInterface $api_response)
     {
         $this->api_response = $api_response;
     }
@@ -54,7 +54,7 @@ class SdkException extends \Exception
     /**
      * @return ResponseInterface
      */
-    public function getResponse(): ResponseInterface
+    public function getResponse()
     {
         return $this->response;
     }
@@ -62,7 +62,7 @@ class SdkException extends \Exception
     /**
      * @return bool
      */
-    public function hasResponse(): bool
+    public function hasResponse()
     {
         return null !== $this->response;
     }
@@ -78,7 +78,7 @@ class SdkException extends \Exception
     /**
      * @return string
      */
-    public function getResponseBody(): string
+    public function getResponseBody()
     {
         return $this->response_body;
     }
@@ -86,16 +86,16 @@ class SdkException extends \Exception
     /**
      * @param string $response_body
      */
-    public function setResponseBody(string $response_body)
+    public function setResponseBody($response_body)
     {
         $this->response_body = $response_body;
     }
 
-    public function hasErrorData():bool
+    public function hasErrorData()
     {
         return ($this->hasResponseData() && isset($this->getResponseData()->code_error,$this->getResponseData()->uuid));
     }
-    public function getErrorData():SdkErrorData
+    public function getErrorData()
     {
         return new SdkErrorData(json_decode($this->getResponseBody(),true));
     }
@@ -124,7 +124,7 @@ class SdkException extends \Exception
     /**
      * @return bool
      */
-    public function hasResponseData(): bool
+    public function hasResponseData()
     {
         return null !== $this->response_data;
     }
@@ -132,7 +132,7 @@ class SdkException extends \Exception
     /**
      * @return bool
      */
-    public function hasResponseBody(): bool
+    public function hasResponseBody()
     {
         return null !== $this->response_body;
     }
@@ -148,7 +148,7 @@ class SdkException extends \Exception
     /**
      * @return AbstractRequest
      */
-    public function getRequest(): AbstractRequest
+    public function getRequest()
     {
         return $this->request;
     }
@@ -156,7 +156,7 @@ class SdkException extends \Exception
     /**
      * @return bool
      */
-    public function hasRequest(): bool
+    public function hasRequest()
     {
         return null !== $this->request;
     }

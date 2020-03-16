@@ -16,14 +16,14 @@ interface ApiClientInterface
      * @return Response
      * @throws Exception
      */
-    public function call(string $method, $url, array $data = null): Response;
+    public function call($method, $url, array $data = null);
 
     /**
      * @param string $url
      * @return Response
      * @throws Exception
      */
-    public function get(string $url);
+    public function get($url);
 
     /**
      * @param string $url
@@ -31,6 +31,6 @@ interface ApiClientInterface
      * @return Response
      * @throws Exception
      */
-    public function post(string $url, array $data);
+    public function post($url, array $data);
 
 }

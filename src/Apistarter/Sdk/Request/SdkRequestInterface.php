@@ -14,7 +14,7 @@ use Exception;
 
 interface SdkRequestInterface
 {
-    public function getFormat(): string;
+    public function getFormat();
 
     public function getMethod();
 

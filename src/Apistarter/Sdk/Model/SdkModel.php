@@ -43,7 +43,7 @@ class SdkModel extends ObjectArrayAccess
     /**
      * @return array
      */
-    public static function getPropertiesTypes():array {
+    public static function getPropertiesTypes() {
         return static::$propertiesTypes;
     }
 
@@ -52,7 +52,7 @@ class SdkModel extends ObjectArrayAccess
      * @return array
      * non utilisé
      */
-    public static function getHiddenApiProperties():array {
+    public static function getHiddenApiProperties() {
         return static::$hidden;
     }
 }

@@ -59,7 +59,7 @@ trait RequestWithBodyTrait
      * @param mixed $resource_body
      * @return static
      */
-    public function setResourceBody($resource_body):self
+    public function setResourceBody($resource_body)
     {
         $this->resource_body = $resource_body;
         return $this;
