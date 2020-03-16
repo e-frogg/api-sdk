@@ -52,6 +52,11 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     private $requestOptions = [];
 
     /**
+     * @var String
+     */
+    private $responseHack;
+
+    /**
      * SdkClient constructor.
      * @param Client $guzzleClient
      * @param SerializerInterface $serializer
@@ -99,7 +104,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             $errorEvent->exception = $e;
             $this->dispatch(SdkClientEvent::REQUEST_ERROR,$errorEvent);
 
-            throw new \Apistarter\Sdk\Exception\GuzzleException($e->getMessage(), $e->getCode());
+//            throw new \Apistarter\Sdk\Exception\GuzzleException($e->getMessage(), $e->getCode());
         }
 
 
@@ -108,7 +113,12 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         if (!class_exists($return_response_class)) {
             throw new LogicException("invalid response class $return_response_class");
         }
-        $response_body = $api_response->getBody()->getContents();
+        if(!$this->hasResponseHack()) {
+            $response_body = $api_response->getBody()->getContents();
+        } else {
+            $response_body = $this->getResponseHack();
+            $this->setResponseHack(null);
+        }
 
         if (is_subclass_of($return_response_class, SingleObjectResponse::class)) {
             /** @var SingleObjectResponse $return_response_class */
@@ -162,7 +172,9 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             dd($request, $body, $response_body);
         }
 
-        $this->dispatchResponseEvent($request, $api_response, $decoratedResponse);
+        if(null !== $api_response) {
+            $this->dispatchResponseEvent($request, $api_response, $decoratedResponse);
+        }
 
         return $decoratedResponse;
     }
@@ -297,6 +309,32 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         $responseEvent->apiResponse = $apiResponse;
         $responseEvent->sdkResponse = $sdkResponse;
         $this->dispatch(SdkClientEvent::RESPONSE,$responseEvent);
+    }
+
+    /**
+     * @return String
+     */
+    public function getResponseHack()
+    {
+        return $this->responseHack;
+    }
+
+    /**
+     * @param String $responseHack
+     * @return SdkClient
+     */
+    public function setResponseHack($responseHack)
+    {
+        $this->responseHack = $responseHack;
+        return $this;
+    }
+
+    /**
+     * @return bool
+     */
+    private function hasResponseHack()
+    {
+        return null !== $this->responseHack;
     }
 
 
