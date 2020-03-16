@@ -11,7 +11,7 @@
     }
   ],
   "require": {
-    "php": ">=7.4.0",
+    "php": ">=5.6.0",
     "efrogg/collection": ">=1.1.1",
     "symfony/serializer": ">=3.4",
     "symfony/property-access": ">=3.4",
