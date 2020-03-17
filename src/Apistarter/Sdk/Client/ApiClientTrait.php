@@ -17,7 +17,7 @@ trait ApiClientTrait
      * @return Response
      * @throws Exception
      */
-    public function get(string $url)
+    public function get(string $url): Response
     {
         return $this->call(Request::METHOD_GET, $url);
     }
@@ -28,7 +28,7 @@ trait ApiClientTrait
      * @return Response
      * @throws Exception
      */
-    public function post(string $url, array $data)
+    public function post(string $url, array $data): Response
     {
         return $this->call(Request::METHOD_POST, $url, $data);
     }

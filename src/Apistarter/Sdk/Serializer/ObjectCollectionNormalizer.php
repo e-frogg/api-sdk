@@ -32,7 +32,7 @@ class ObjectCollectionNormalizer implements DenormalizerInterface, SerializerAwa
      *
      * @throws NotNormalizableValueException
      */
-    public function denormalize($data, $class, $format = null, array $context = [])
+    public function denormalize($data, $class, string $format = null, array $context = [])
     {
         if (null === $this->serializer) {
             throw new BadMethodCallException('Please set a serializer before calling denormalize()!');
@@ -55,7 +55,7 @@ class ObjectCollectionNormalizer implements DenormalizerInterface, SerializerAwa
     /**
      * {@inheritdoc}
      */
-    public function supportsDenormalization($data, $type, $format = null/*, array $context = []*/)
+    public function supportsDenormalization($data, $type, string $format = null, array $context = [])
     {
 
         return is_subclass_of($type,SdkModelCollection::class)

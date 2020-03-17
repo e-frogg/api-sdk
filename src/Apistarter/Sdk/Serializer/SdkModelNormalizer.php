@@ -20,17 +20,17 @@ class SdkModelNormalizer extends ObjectNormalizer
 
     }
 
-    protected function extractAttributes($object, $format = null, array $context = [])
+    protected function extractAttributes($object, string $format = null, array $context = [])
     {
         return $object->getAttributes();
     }
 
-    public function supportsDenormalization($data, $type, $format = null)
+    public function supportsDenormalization($data, $type, string $format = null)
     {
         return is_subclass_of($type,SdkModel::class);
     }
 
-    public function supportsNormalization($data, $format = null)
+    public function supportsNormalization($data, string $format = null)
     {
         return $data instanceof SdkModel;
     }
