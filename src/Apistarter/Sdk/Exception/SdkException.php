@@ -1,6 +1,8 @@
 <?php
+
 namespace Apistarter\Sdk\Exception;
 
+use Apistarter\Sdk\Model\SdkModel;
 use Apistarter\Sdk\Request\AbstractRequest;
 use GuzzleHttp\Exception\RequestException;
 use Psr\Http\Message\ResponseInterface;
@@ -16,7 +18,7 @@ class SdkException extends \Exception
     protected $response;
 
     /** @var string */
-    protected $response_body='';
+    protected $response_body = '';
 
     /** @var array|null */
     protected $response_data;
@@ -26,6 +28,12 @@ class SdkException extends \Exception
 
     /** @var AbstractRequest */
     protected $request;
+
+    /**
+     * classe de l'erreur. Doit étendre SdkModel
+     * @var string
+     */
+    protected $errorDataClass = SdkErrorData::class;
 
     /**
      * @return ApiResponse
@@ -93,11 +101,13 @@ class SdkException extends \Exception
 
     public function hasErrorData():bool
     {
-        return ($this->hasResponseData() && isset($this->getResponseData()->code_error,$this->getResponseData()->uuid));
+        return ($this->hasResponseBody() && !empty($this->getErrorDataClass()));
     }
+
     public function getErrorData():SdkErrorData
     {
-        return new SdkErrorData(json_decode($this->getResponseBody(),true));
+        $className = $this->getErrorDataClass();
+        return new $className(json_decode($this->getResponseBody(), true));
     }
 
 
@@ -169,15 +179,38 @@ class SdkException extends \Exception
         $this->request = $request;
     }
 
-    public function hasUuid() {
-        return defined(get_class($this).'::uuid');
-
+    public function hasUuid()
+    {
+        return defined(get_class($this) . '::uuid');
     }
-    public function getUuid() {
-        if($this->hasUuid()) {
-            return constant(get_class($this).'::uuid');
+
+    public function getUuid()
+    {
+        if ($this->hasUuid()) {
+            return constant(get_class($this) . '::uuid');
         }
         return null;
+    }
+
+    /**
+     * @param string $errorDataClass
+     * @return SdkException
+     */
+    public function setErrorDataClass($errorDataClass)
+    {
+        if (!is_subclass_of($errorDataClass, SdkModel::class)) {
+            throw new \LogicException('errorClass ' . $errorDataClass . ' must extend SdkModel');
+        }
+        $this->errorDataClass = $errorDataClass;
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getErrorDataClass()
+    {
+        return $this->errorDataClass;
     }
 
 }

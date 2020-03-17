@@ -4,12 +4,12 @@
 namespace Apistarter\Sdk\Event;
 
 
-use Apistarter\Sdk\Request\SdkRequestInterface;
 use Exception;
 
-class RequestErrorEvent
+class RequestErrorEvent extends RequestEvent
 {
-    public SdkRequestInterface $request;
-
+    /**
+     * @var Exception
+     */
     public Exception $exception;
 }
