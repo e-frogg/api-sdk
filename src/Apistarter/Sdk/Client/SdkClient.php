@@ -104,7 +104,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             $errorEvent->exception = $e;
             $this->dispatch(SdkClientEvent::REQUEST_ERROR,$errorEvent);
 
-//            throw new \Apistarter\Sdk\Exception\GuzzleException($e->getMessage(), $e->getCode());
+            throw new \Apistarter\Sdk\Exception\GuzzleException($e->getMessage(), $e->getCode());
         }
 
 
