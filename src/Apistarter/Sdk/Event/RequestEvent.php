@@ -6,9 +6,9 @@ namespace Apistarter\Sdk\Event;
 
 use Apistarter\Sdk\Request\SdkRequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Symfony\Contracts\EventDispatcher\Event;
+use Symfony\Component\EventDispatcher\Event;
 
-class responseEvent extends Event
+class RequestEvent extends Event
 {
 
     /**
@@ -19,8 +19,4 @@ class responseEvent extends Event
      * @var ResponseInterface
      */
     public $apiResponse;
-    /**
-     * @var mixed
-     */
-    public $sdkResponse;
 }
