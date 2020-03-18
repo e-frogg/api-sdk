@@ -9,6 +9,7 @@
 namespace Apistarter\Sdk\Request;
 
 
+use Apistarter\Sdk\Client\RequestDecoratorTrait;
 use Apistarter\Sdk\Exception\BadRequestException;
 use Apistarter\Sdk\Exception\BadResponseException;
 use Apistarter\Sdk\Exception\Custom\SdkCustomException;
@@ -31,6 +32,8 @@ use Exception;
 
 abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
 {
+    use RequestDecoratorTrait;
+
     // -------- debut a configurer -------------
     //    protected static $responseClass = MyResponse::class;
     //    protected static $endpoint='/xxx';
@@ -52,7 +55,7 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
      *
      * ex :  /margin_profiles/{idMarginProfile}
      */
-    protected static $endpoint;
+    protected static $endpoint = '';
 
     /**
      * paramètres qui seront remontés dans la query string
@@ -83,7 +86,7 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
     protected static $customExceptions = [];
 
     protected static $defaultCustomExceptions = [
-        ValidationException::class
+        ValidationException::class,
     ];
 
     /**
@@ -108,14 +111,14 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
     protected static $method;
 
     /** @var string */
-    protected static $format='json';
+    protected static $format = 'json';
 
     /**
      * @return array
      */
     public static function getCustomExceptions(): array
     {
-        return array_merge(static::$defaultCustomExceptions,static::$customExceptions);
+        return array_merge(static::$defaultCustomExceptions, static::$customExceptions);
     }
 
 
@@ -157,10 +160,14 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
         return [];
     }
 
-    public function getEndPoint()
+    public function getEndPoint($decorated = true)
     {
-        return static::$endpoint;
+        if (false === $decorated) {
+            return static::$endpoint;
+        }
+        return $this->decorateEndpoint(static::$endpoint);
     }
+
     public function getResponseClass()
     {
         return static::$responseClass;
@@ -168,7 +175,7 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
 
     public function getQueryParameters()
     {
-        return static::$queryParameters;
+        return $this->decorateQueryParameters(static::$queryParameters);
     }
     /** @noinspection PhpDocRedundantThrowsInspection */
 
@@ -198,27 +205,27 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
      * @param Exception|null $previous
      * @throws SdkCustomException
      */
-    public function dispatchCustomException(SdkErrorData $sdkErrorData, Exception $previous=null)
+    public function dispatchCustomException(SdkErrorData $sdkErrorData, Exception $previous = null)
     {
-        foreach(static::getCustomExceptions() as $exceptionClass) {
-            if($sdkErrorData->uuid === constant($exceptionClass.'::uuid')) {
+        foreach (static::getCustomExceptions() as $exceptionClass) {
+            if ($sdkErrorData->uuid === constant($exceptionClass . '::uuid')) {
                 /** @var SdkCustomException $exception */
-                $exception = new $exceptionClass($sdkErrorData->message,$sdkErrorData->code_error,$previous);
+                $exception = new $exceptionClass($sdkErrorData->message, $sdkErrorData->code_error, $previous);
                 // forward les infos de l'exceptoin précédente
-                if($previous instanceof SdkException) {
-                    if($previous->hasRequest()) {
+                if ($previous instanceof SdkException) {
+                    if ($previous->hasRequest()) {
                         $exception->setRequest($previous->getRequest());
                     }
-                    if($previous->hasApiResponse()) {
+                    if ($previous->hasApiResponse()) {
                         $exception->setApiResponse($previous->getApiResponse());
                     }
-                    if($previous->hasResponse()) {
+                    if ($previous->hasResponse()) {
                         $exception->setResponse($previous->getResponse());
                     }
-                    if($previous->hasResponseBody()) {
+                    if ($previous->hasResponseBody()) {
                         $exception->setResponseBody($previous->getResponseBody());
                     }
-                    if($previous->hasResponseData()) {
+                    if ($previous->hasResponseData()) {
                         $exception->setResponseData($previous->getResponseData());
                     }
                 }
@@ -226,4 +233,21 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
             }
         }
     }
+
+    public function decorateEndpoint(string $endpoint)
+    {
+        foreach ($this->requestDecorators as $decorator) {
+            $endpoint = $decorator->decorateEndpoint($endpoint, $this);
+        }
+        return $endpoint;
+    }
+
+    private function decorateQueryParameters(array $queryParameters)
+    {
+        foreach ($this->requestDecorators as $decorator) {
+            $queryParameters = $decorator->decorateQueryParameters($queryParameters, $this);
+        }
+        return $queryParameters;
+    }
+
 }

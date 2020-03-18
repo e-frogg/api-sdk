@@ -13,6 +13,7 @@ use Apistarter\Sdk\Exception\GuzzleException as SdkGuzzleException;
 use Apistarter\Sdk\Exception\NotFoundException;
 use Apistarter\Sdk\Exception\SdkException;
 use Apistarter\Sdk\Model\SdkModel;
+use Apistarter\Sdk\Request\AbstractRequest;
 use Apistarter\Sdk\Request\RequestWithBody;
 use Apistarter\Sdk\Request\SdkRequestInterface;
 use Apistarter\Sdk\Response\SingleObjectResponse;
@@ -36,6 +37,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class SdkClient extends EventDispatcher implements SdkClientInterface
 {
+    use RequestDecoratorTrait;
     /**
      * @var NormalizerInterface|SerializerInterface
      */
@@ -60,13 +62,13 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     /**
      * @var String
      */
-    private ?string $responseHack=null;
+    private ?string $responseHack = null;
 
     /**
      * Nom de la classe utilisée pour déserialiser les erreurs
      * @var string
      */
-    protected ?string $errorClass=null;
+    protected ?string $errorClass = null;
 
     /**
      * SdkClient constructor.
@@ -89,6 +91,9 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
      */
     public function execute(SdkRequestInterface $request)
     {
+        if ($request instanceof AbstractRequest) {
+            $this->decorateRequest($request);
+        }
         $body = [];
         if ($request instanceof RequestWithBody && null !== ($bodyParams = $request->getBodyParams())) {
             //TODO : gestion des exceptions
@@ -107,7 +112,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             if (!empty($body)) {
                 $options[RequestOptions::BODY] = $body;
             }
-
+            dump($request->getUrl(), $options);
             $api_response = $this->apiClient->request(
                 $request->getMethod(),
                 $request->getUrl(),
@@ -326,13 +331,13 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
         $responseEvent->request = $request;
         $responseEvent->apiResponse = $apiResponse;
         $responseEvent->sdkResponse = $sdkResponse;
-        $this->dispatch($responseEvent,SdkClientEvent::RESPONSE);
+        $this->dispatch($responseEvent, SdkClientEvent::RESPONSE);
     }
 
     /**
      * @return String
      */
-    public function getResponseHack():string
+    public function getResponseHack(): string
     {
         return $this->responseHack;
     }
@@ -350,7 +355,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     /**
      * @return bool
      */
-    private function hasResponseHack():bool
+    private function hasResponseHack(): bool
     {
         return null !== $this->responseHack;
     }
@@ -398,7 +403,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             }
         }
 
-        $this->dispatch($errorEvent,SdkClientEvent::REQUEST_ERROR);
+        $this->dispatch($errorEvent, SdkClientEvent::REQUEST_ERROR);
 
         throw $thrownException;
     }
@@ -419,10 +424,16 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     /**
      * @return string
      */
-    public function getErrorClass():string
+    public function getErrorClass(): string
     {
         return $this->errorClass;
     }
 
+    public function decorateRequest(AbstractRequest $request): void
+    {
+        foreach ($this->requestDecorators as $decorator) {
+            $request->addRequestDecorator($decorator);
+        }
+    }
 
 }
