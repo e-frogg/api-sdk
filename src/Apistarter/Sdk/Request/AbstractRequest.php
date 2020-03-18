@@ -9,7 +9,7 @@
 namespace Apistarter\Sdk\Request;
 
 
-use Apistarter\Sdk\Client\RequestDecoratorTrait;
+use Apistarter\Sdk\Client\SdkRequestDecoratorTrait;
 use Apistarter\Sdk\Exception\BadRequestException;
 use Apistarter\Sdk\Exception\BadResponseException;
 use Apistarter\Sdk\Exception\Custom\SdkCustomException;
@@ -32,7 +32,7 @@ use Exception;
 
 abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
 {
-    use RequestDecoratorTrait;
+    use SdkRequestDecoratorTrait;
 
     // -------- debut a configurer -------------
     //    protected static $responseClass = MyResponse::class;

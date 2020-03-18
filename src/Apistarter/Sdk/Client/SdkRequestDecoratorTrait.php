@@ -4,17 +4,17 @@
 namespace Apistarter\Sdk\Client;
 
 
-use Apistarter\Sdk\Request\RequestDecoratorInterface;
+use Apistarter\Sdk\Request\SdkRequestDecoratorInterface;
 
-trait RequestDecoratorTrait
+trait SdkRequestDecoratorTrait
 {
     /**
-     * @var RequestDecoratorInterface[]
+     * @var SdkRequestDecoratorInterface[]
      */
     protected array $requestDecorators = [];
 
     /**
-     * @param RequestDecoratorInterface[] $requestDecorators
+     * @param SdkRequestDecoratorInterface[] $requestDecorators
      * @return self
      */
     public function setRequestDecorators(array $requestDecorators): self
@@ -24,17 +24,17 @@ trait RequestDecoratorTrait
     }
 
     /**
-     * @param RequestDecoratorInterface $requestDecorator
-     * @return RequestDecoratorTrait
+     * @param SdkRequestDecoratorInterface $requestDecorator
+     * @return SdkRequestDecoratorTrait
      */
-    public function addRequestDecorator(RequestDecoratorInterface $requestDecorator): self
+    public function addRequestDecorator(SdkRequestDecoratorInterface $requestDecorator): self
     {
         $this->requestDecorators[] = $requestDecorator;
         return $this;
     }
 
     /**
-     * @return RequestDecoratorInterface[]
+     * @return SdkRequestDecoratorInterface[]
      */
     public function getRequestDecorators(): array
     {

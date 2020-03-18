@@ -37,7 +37,7 @@ use Symfony\Component\Serializer\SerializerInterface;
 
 class SdkClient extends EventDispatcher implements SdkClientInterface
 {
-    use RequestDecoratorTrait;
+    use SdkRequestDecoratorTrait;
     /**
      * @var NormalizerInterface|SerializerInterface
      */
@@ -112,7 +112,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             if (!empty($body)) {
                 $options[RequestOptions::BODY] = $body;
             }
-            dump($request->getUrl(), $options);
+
             $api_response = $this->apiClient->request(
                 $request->getMethod(),
                 $request->getUrl(),

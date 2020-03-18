@@ -4,7 +4,7 @@
 namespace Apistarter\Sdk\Request;
 
 
-interface RequestDecoratorInterface
+interface SdkRequestDecoratorInterface
 {
     public function decorateEndpoint(string $endpoint,SdkRequestInterface $request);
     public function decorateQueryParameters(array $queryParameters,SdkRequestInterface $request);
