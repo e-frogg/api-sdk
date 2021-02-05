@@ -216,9 +216,6 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
                     if ($previous->hasRequest()) {
                         $exception->setRequest($previous->getRequest());
                     }
-                    if ($previous->hasApiResponse()) {
-                        $exception->setApiResponse($previous->getApiResponse());
-                    }
                     if ($previous->hasResponse()) {
                         $exception->setResponse($previous->getResponse());
                     }
