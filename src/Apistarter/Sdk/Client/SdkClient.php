@@ -388,7 +388,8 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
 
         // remontée de ce qu'il faut
         if ($thrownException instanceof SdkClientException) {
-            $thrownException->setApiResponse($e->getResponse());
+
+            $thrownException->setResponse($e->getResponse());
             if ($e->hasResponse() && ($responsebodyContent = $e->getResponse()->getBody()->getContents())) {
                 // pour les prochains qui l'appelleraient
                 $e->getResponse()->getBody()->rewind();
@@ -424,7 +425,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
     /**
      * @return string
      */
-    public function getErrorClass(): string
+    public function getErrorClass(): ?string
     {
         return $this->errorClass;
     }
