@@ -11,9 +11,6 @@ use Psr\Http\Message\ResponseInterface;
 class SdkException extends \Exception
 {
 
-    /** @var ApiResponse */
-    protected $api_response;
-
     /** @var ResponseInterface */
     protected $response;
 
@@ -34,30 +31,6 @@ class SdkException extends \Exception
      * @var string
      */
     protected $errorDataClass = SdkErrorData::class;
-
-    /**
-     * @return ApiResponse
-     */
-    public function getApiResponse(): ApiResponse
-    {
-        return $this->api_response;
-    }
-
-    /**
-     * @return bool
-     */
-    public function hasApiResponse(): bool
-    {
-        return null !== $this->api_response;
-    }
-
-    /**
-     * @param ApiResponse $api_response
-     */
-    public function setApiResponse(ApiResponse $api_response)
-    {
-        $this->api_response = $api_response;
-    }
 
     /**
      * @return ResponseInterface
