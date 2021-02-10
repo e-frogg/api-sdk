@@ -14,14 +14,34 @@ use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
 
 class SdkModelNormalizer extends ObjectNormalizer
 {
+    /**
+     * @param SdkModel $object
+     * @param null   $format
+     * @param array  $context
+     * @return string[]
+     * @throws \Exception
+     */
     protected function getAttributes($object, $format = null, array $context) {
-        $context["attributes"]="NO_CACHE !!!!";
+        if($object->isStaticStructure() ) {
+            $context['cache_key']=get_class($object);
+        } else {
+            $context['cache_key']=random_int(0,1000);
+        }
         return parent::getAttributes($object, $format,$context);
 
     }
 
+    /**
+     * @param SdkModel      $object
+     * @param string|null $format
+     * @param array       $context
+     * @return array|string[]
+     */
     protected function extractAttributes($object, string $format = null, array $context = [])
     {
+        if($object->isStaticStructure()) {
+            return $object->getStaticStructure();
+        }
         return $object->getAttributes();
     }
 

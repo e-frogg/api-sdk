@@ -55,4 +55,13 @@ class SdkModel extends ObjectArrayAccess
     public static function getHiddenApiProperties():array {
         return static::$hidden;
     }
+
+    public function isStaticStructure(): bool
+    {
+        return false !== static::$fixed_structure;
+    }
+    public function getStaticStructure(): array
+    {
+        return static::$structure_properties;
+    }
 }
