@@ -18,6 +18,17 @@ class SdkModelCollection extends ObjectCollection
     // -------- fin a configurer -------------
 
     protected static $itemClass;
+    protected static $collectionPrimaryKey;
+
+    /**
+     * @return mixed
+     */
+    public function initCollection()
+    {
+        if(null !== static::$collectionPrimaryKey) {
+            $this->setPrimary(static::$collectionPrimaryKey);
+        }
+    }
 
     public function getItemClass() {
         return static::$itemClass;
