@@ -4,10 +4,10 @@
 namespace Apistarter\Sdk\Client;
 
 
+use Apistarter\Sdk\Decorator\BodyDecoratorInterface;
 use Apistarter\Sdk\Event\RequestErrorEvent;
 use Apistarter\Sdk\Event\ResponseEvent;
 use Apistarter\Sdk\Event\SdkClientEvent;
-use Apistarter\Sdk\Decorator\BodyDecoratorInterface;
 use Apistarter\Sdk\Exception\ClientException as SdkClientException;
 use Apistarter\Sdk\Exception\GuzzleException as SdkGuzzleException;
 use Apistarter\Sdk\Exception\NotFoundException;
@@ -24,20 +24,23 @@ use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
 use JsonException;
+use LogicException;
 use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 use Symfony\Component\Serializer\Exception\ExceptionInterface;
+use Symfony\Component\Serializer\Exception\NotEncodableValueException;
+use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\SerializerInterface;
+
 use function is_array;
 use function is_object;
 use function is_string;
-use LogicException;
-use RuntimeException;
-use Symfony\Component\EventDispatcher\EventDispatcher;
-use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
-use Symfony\Component\Serializer\SerializerInterface;
 
 class SdkClient extends EventDispatcher implements SdkClientInterface
 {
     use SdkRequestDecoratorTrait;
+
     /**
      * @var NormalizerInterface|SerializerInterface
      */
@@ -137,67 +140,64 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
             $this->setResponseHack(null);
         }
 
-        if (is_subclass_of($return_response_class, SingleObjectResponse::class)) {
-            /** @var SingleObjectResponse $return_response_class */
-            // cas d'une réponse avec un seul type, on crée la réponse,
-            // et on y injecte la propriété désérialisée, avec le bon type
+        try {
+            if (is_subclass_of($return_response_class, SingleObjectResponse::class)) {
+                /** @var SingleObjectResponse $return_response_class */
+                // cas d'une réponse avec un seul type, on crée la réponse,
+                // et on y injecte la propriété désérialisée, avec le bon type
 
-            $return_response = new $return_response_class();
+                $return_response = new $return_response_class();
 
-            $object_class = $return_response_class::getResponsePropertyType();
+                $object_class = $return_response_class::getResponsePropertyType();
 
-//            if(null === $object_class) {
-//                $object=$response_body;
-//
-//            } else {
-//            try {
-            $object = $this->serializer->deserialize(
-                $response_body,
-                $object_class,
-                $request->getFormat()
+                $object = $this->serializer->deserialize(
+                    $response_body,
+                    $object_class,
+                    $request->getFormat()
+                );
+
+                $return_response_property = $return_response_class::getResponsePropertyName();
+                $return_response->$return_response_property = $this->getDecorateResponseBody($object);
+
+                $this->dispatchResponseEvent($request, $api_response, $return_response);
+                return $return_response;
+            }
+
+
+            if ('DELETE' === $request->getMethod()) {
+                $array_response_body = ['code' => $api_response->getStatusCode()];
+                if ($api_response->getStatusCode() !== 204) {
+                    throw new RuntimeException('expected code for DELETE is 204. '.$api_response->getStatusCode().' found');
+                }
+                try {
+                    $response_body = json_encode($array_response_body, JSON_THROW_ON_ERROR);
+                } catch (JsonException $exception) {
+                    //TODO ?
+                }
+            }
+
+            // cas d'une réponse désérialisable directement (Response / Model)
+            $decoratedResponse = $this->getDecorateResponseBody(
+                $this->serializer->deserialize(
+                    $response_body,
+                    $return_response_class,
+                    $request->getFormat()
+                )
             );
-//            } catch (NotEncodableValueException $exception) {
-//                dd($request, $body, $response_body);
-//            }
 
-            $return_response_property = $return_response_class::getResponsePropertyName();
-            $return_response->$return_response_property = $this->getDecorateResponseBody($object);
-
-            $this->dispatchResponseEvent($request, $api_response, $return_response);
-            return $return_response;
-        }
-
-
-        if ('DELETE' === $request->getMethod()) {
-            $array_response_body = ['code' => $api_response->getStatusCode()];
-            if ($api_response->getStatusCode() !== 204) {
-                throw new RuntimeException('Not 204 code for DELETE');
+            if (null !== $api_response) {
+                $this->dispatchResponseEvent($request, $api_response, $decoratedResponse);
             }
-            try {
-                $response_body = json_encode($array_response_body, JSON_THROW_ON_ERROR);
-            } catch (JsonException $exception) {
-                //TODO ?
-            }
+
+            return $decoratedResponse;
+        } catch (NotEncodableValueException $exception) {
+            $rethrowException = new \Apistarter\Sdk\Exception\NotEncodableValueException(
+                $exception->getMessage() . ' body : ' . $response_body, $exception->getCode(), $exception
+            );
+            $rethrowException->setResponse($api_response);
+            $rethrowException->setResponseBody($response_body);
+            throw $rethrowException;
         }
-
-        // cas d'une réponse désérialisable directement (Response / Model)
-//        try {
-        $decoratedResponse = $this->getDecorateResponseBody(
-            $this->serializer->deserialize(
-                $response_body,
-                $return_response_class,
-                $request->getFormat()
-            )
-        );
-//        } catch (NotEncodableValueException $exception) {
-//            dd($request, $body, $response_body);
-//        }
-
-        if (null !== $api_response) {
-            $this->dispatchResponseEvent($request, $api_response, $decoratedResponse);
-        }
-
-        return $decoratedResponse;
     }
 
     /**
@@ -388,7 +388,6 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
 
         // remontée de ce qu'il faut
         if ($thrownException instanceof SdkClientException) {
-
             $thrownException->setResponse($e->getResponse());
             if ($e->hasResponse() && ($responsebodyContent = $e->getResponse()->getBody()->getContents())) {
                 // pour les prochains qui l'appelleraient
