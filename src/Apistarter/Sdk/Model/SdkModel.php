@@ -19,6 +19,9 @@ class SdkModel extends ObjectArrayAccess
     //    protected static $visible = [];
     // -------- fin a configurer -------------
 
+    /**
+     * @var array<string,string>
+     */
     protected static $propertiesTypes = [];
 
     /**

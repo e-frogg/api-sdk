@@ -173,6 +173,13 @@ abstract class AbstractRequest extends SdkModel implements SdkRequestInterface
         return static::$responseClass;
     }
 
+    /**
+     * @return string[]
+     */
+    public function getQueryParameterNames(){
+        return static::$queryParameters;
+    }
+
     public function getQueryParameters()
     {
         return $this->decorateQueryParameters(static::$queryParameters);

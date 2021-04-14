@@ -16,4 +16,6 @@ interface RequestWithBody
      */
     public function getBodyParams();
 
+    public function getBodyParameterNames();
+
 }

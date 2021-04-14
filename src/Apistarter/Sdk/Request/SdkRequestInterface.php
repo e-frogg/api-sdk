@@ -26,5 +26,7 @@ interface SdkRequestInterface
 
     public function getQueryParameters();
 
+    public function getQueryParameterNames();
+
     public function dispatchCustomException(SdkErrorData $sdkErrorData, Exception $previous=null);
 }

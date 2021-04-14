@@ -13,7 +13,7 @@ use function is_array;
 
 trait RequestWithBodyTrait
 {
-    /** @var array | string */
+    /** @var array<string> | string */
     protected static $bodyParams='resource_body';
 
     /**
@@ -30,6 +30,9 @@ trait RequestWithBodyTrait
         $this->resource_body = $request_body;
     }
 
+    public function getBodyParameterNames(){
+        return static::$bodyParams;
+    }
 
     /**
      * @return array|mixed|null
