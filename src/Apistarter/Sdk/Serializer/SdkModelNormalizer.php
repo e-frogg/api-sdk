@@ -25,7 +25,7 @@ class SdkModelNormalizer extends ObjectNormalizer
         if($object->isStaticStructure() ) {
             $context['cache_key']=get_class($object);
         } else {
-            $context['cache_key']=random_int(0,1000);
+            $context['cache_key']=random_int(0,1000000);
         }
         return parent::getAttributes($object, $format,$context);
 
