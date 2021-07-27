@@ -19,7 +19,8 @@ class SdkModelCollection extends ObjectCollection
 
     protected static $itemClass;
 
-    public function getItemClass() {
+    public function getItemClass($key, $data)
+    {
         return static::$itemClass;
     }
 
