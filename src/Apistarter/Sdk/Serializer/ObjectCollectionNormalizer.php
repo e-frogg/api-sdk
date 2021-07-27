@@ -43,10 +43,10 @@ class ObjectCollectionNormalizer implements DenormalizerInterface, SerializerAwa
 
         /** @var SdkModelCollection $collection */
         $collection = new $class();
-        $item_class = $collection->getItemClass();
         $serializer = $this->serializer;
 
         foreach ($data as $key => $value) {
+            $item_class = $collection->getItemClass($key, $value);
             $collection->add($serializer->denormalize($value, $item_class, $format, $context));
         }
         return $collection;
