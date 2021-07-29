@@ -25,12 +25,13 @@ class SdkModelCollection extends ObjectCollection
      */
     public function initCollection()
     {
-        if(null !== static::$collectionPrimaryKey) {
+        if (null !== static::$collectionPrimaryKey) {
             $this->setPrimary(static::$collectionPrimaryKey);
         }
     }
 
-    public function getItemClass() {
+    public function getItemClass($key, $data)
+    {
         return static::$itemClass;
     }
 
