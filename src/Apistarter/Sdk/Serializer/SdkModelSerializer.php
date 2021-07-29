@@ -42,11 +42,6 @@ class SdkModelSerializer implements SerializerInterface, ContextAwareNormalizerI
         return new Serializer($normalizers, [new XmlEncoder(), new JsonEncoder()]);
     }
 
-    public function __call($name, $arguments)
-    {
-        return call_user_func_array([$this->serializer, $name], $arguments);
-    }
-
     public function supportsDecoding(string $format, array $context = [])
     {
         return $this->serializer->supportsDecoding(...func_get_args());
