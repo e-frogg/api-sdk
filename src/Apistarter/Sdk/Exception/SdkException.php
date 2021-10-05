@@ -29,6 +29,9 @@ class SdkException extends \Exception
     /** @var AbstractRequest */
     protected $request;
 
+    /** @var string */
+    protected $fullResponse;
+
     /**
      * classe de l'erreur. Doit étendre SdkModel
      * @var string
@@ -211,6 +214,22 @@ class SdkException extends \Exception
     public function getErrorDataClass()
     {
         return $this->errorDataClass;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFullResponse(): string
+    {
+        return $this->fullResponse;
+    }
+
+    /**
+     * @param string $fullResponse
+     */
+    public function setFullResponse(string $fullResponse): void
+    {
+        $this->fullResponse = $fullResponse;
     }
 
 }

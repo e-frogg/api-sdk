@@ -21,6 +21,7 @@ use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Exception\ServerException;
 use GuzzleHttp\RequestOptions;
 use Psr\Http\Message\ResponseInterface;
 use Symfony\Component\Serializer\Exception\NotEncodableValueException;
@@ -111,7 +112,7 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
                 $request->getUrl(),
                 $options
             );
-        } catch (GuzzleException $e) {
+        } catch (ServerException $e) {
             if (!$this->hasResponseHack()) {
                 $this->handleGuzzleException($e, $request);
             }
@@ -366,6 +367,10 @@ class SdkClient extends EventDispatcher implements SdkClientInterface
 
         /** @var SdkException $thrownException */
         $thrownException = new $thrownExceptionClass($e->getMessage(), $e->getCode());
+
+        if ($e instanceof ServerException) {
+            $thrownException->setFullResponse($e->getResponse()->getBody()->getContents());
+        }
 
         // remontée de ce qu'il faut
         if ($thrownException instanceof SdkClientException) {
